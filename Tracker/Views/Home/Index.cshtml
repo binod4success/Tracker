@@ -1,0 +1,55 @@
+﻿@model Tracker.ViewModels.IndexViewModel
+@{
+    ViewBag.Title = "Home Page";
+}
+@section featured {
+    <section class="featured">
+        <div class="content-wrapper">
+            <hgroup class="title">
+                <h1>@ViewBag.Title.</h1>
+                <h2>@ViewBag.Message</h2>
+            </hgroup>
+            <p>
+                Track your men working in the field                
+            </p>
+        </div>
+    </section>
+}
+<h3>Showing List:</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Tracking ID</th>
+            <th>Status</th>
+            <th>Remarks</th>
+            <th>Assign Date Time</th>
+            <th>Delivery Date Time</th>
+            <th>Contact Number</th>
+            <th>Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ConsignmentList)
+        {
+            <tr>
+                <td>@item.TrackingId</td>
+                <td>@item.Status</td>
+                <td>@item.Remarks</td>
+                <td>@item.AssignDateTime</td>
+                <td>@item.DeliveryDateTime</td>
+                <td>@item.ContactNumber</td>
+                <td>
+                    @item.Destination.AddressLine1
+                    @item.Destination.AddressLine2
+                    @item.Destination.City
+                    @item.Destination.State
+                    @item.Destination.Country
+                    @item.Destination.PinCode
+                    @item.Destination.LandMark
+                    <br />@item.Destination.GeoLocation.Latitude
+                    <br />@item.Destination.GeoLocation.Longitude
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

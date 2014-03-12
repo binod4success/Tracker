@@ -10,5 +10,7 @@ namespace Tracker.Repository
     interface ITrackingDetails
     {
         IList<Consignment> GetAllConsignmentDetails();
+
+        IList<TrackingDetails> GetTrackingDetails(string trackingId);
     }
 }

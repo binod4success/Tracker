@@ -20,9 +20,9 @@ namespace TrackerWebApi.Controllers
         }
 
         // GET api/tracking/5
-        public string Get(string trackId)
+        public IList<TrackingDetails> Get(string trackingId)
         {
-            return "value";
+            return _repos.GetTrackingDetails(trackingId);
         }
 
         // POST api/tracking

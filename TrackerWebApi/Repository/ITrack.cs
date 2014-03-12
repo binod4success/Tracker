@@ -14,5 +14,7 @@ namespace TrackerWebApi.Repository
         GeoLocation GetCurrentLocation(string trackingId);
 
         GeoLocation UpdateLocation(string trackingId, GeoLocation location);
+
+        IList<TrackingDetails> GetTrackingDetails(string trackingId);
     }
 }

@@ -11,6 +11,6 @@ namespace TrackerWebApi.Models
 
         public DateTime TrackingDateTime { get; set; }
 
-        public IList<GeoLocation> Locations { get; set; }
+        public GeoLocation Locations { get; set; }
     }
 }

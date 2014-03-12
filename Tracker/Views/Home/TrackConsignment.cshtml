@@ -1,0 +1,127 @@
+﻿@model Tracker.ViewModels.TrackConsignmentViewModel
+@{
+    ViewBag.Title = "TrackConsignment";
+    var locations = Json.Encode(Model.TrackingLocations.Select(p => p.Locations));
+
+}
+
+<input type="hidden" id="hfLocations" value='@Html.Raw(locations)' />
+
+<h2>Consignment Tracking Number: @Model.TrackingId </h2>
+
+<h3>Locations List:</h3>
+<table class="grid-style">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Location</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td width="80%" rowspan="@(Model.TrackingLocations.Count + 1)">
+                <div id="map-canvas" style="width: 100%; height: 600px"></div>
+                @*@item.Locations.Latitude
+                    @item.Locations.Longitude*@
+                <br />
+                @*<span data-geo-url="@string.Format("http://maps.google.com/maps/api/staticmap?zoom=18&size=300x300&maptype=satellite&sensor=false&center={0},{1}", item.Locations.Latitude, item.Locations.Longitude)"
+                    class="ui-icon ui-icon-image" style="cursor:pointer; display:inline-block"></span><span>Map</span>*@
+            </td>
+        </tr>
+        @foreach (var item in Model.TrackingLocations)
+        {
+            <tr>
+                <td width="20%">
+                    @item.TrackingDateTime
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+@section scripts{
+    <style type="text/css">
+        .map {
+            width: 305px;
+            height: 305px;
+            border: 5px solid gray;
+            border-radius: 10px;
+        }
+
+        .ui-tooltip {
+            max-width: 305px;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script type="text/javascript">
+        function initialize() {
+            var mapOptions = {
+                zoom: 3,
+                center: new google.maps.LatLng(32.71533, -117.15726),
+                mapTypeId: google.maps.MapTypeId.TERRAIN
+            };
+            // Creating a LatLngBounds object
+            var bounds = new google.maps.LatLngBounds();
+            var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+            //var flightPlanCoordinates = [
+            //  new google.maps.LatLng(37.772323, -122.214897),
+            //  new google.maps.LatLng(21.291982, -157.821856),
+            //  new google.maps.LatLng(-18.142599, 178.431),
+            //  new google.maps.LatLng(-27.46758, 153.027892)
+            //];
+            var data = $.parseJSON($('#hfLocations').val());
+            var flightPlanCoordinates = [];
+            $.each(data, function (key, item) {
+                flightPlanCoordinates.push(new google.maps.LatLng(item["Latitude"], item["Longitude"]));
+            });
+            var flightPath = new google.maps.Polyline({
+                path: flightPlanCoordinates,
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2
+            });
+            flightPath.setMap(map);
+
+            var markerImage = {
+                //url: 'Images/mapLocationMarkerImage.png',
+                // This marker is 20 pixels wide by 32 pixels tall.
+                size: new google.maps.Size(50, 50),
+            };
+            for (var i = 0; i < places.length; i++) {
+                // Adding the markers
+                var marker = new google.maps.Marker({
+                    position: places[i],
+                    map: map,
+                    //icon: markerImage,
+                    title: data[i].Name
+                });
+
+                // Extending the bounds object with each LatLng
+                bounds.extend(places[i]);
+            }
+        }
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+        $(function () {
+            $(document).tooltip({
+                items: "[data-geo-url]",
+                track: true,
+                position: {
+                    my: "left top",
+                    at: "left bottom"
+                },
+                content: function () {
+                    var element = $(this);
+                    if (element.is("[data-geo-url]")) {
+                        return "<img class='map' alt='map' src='" + element.attr('data-geo-url') + "'>";
+                    }
+                }, show: {
+                    effect: "slideDown",
+                    delay: 500
+                }
+            });
+        });
+    </script>
+}

@@ -205,6 +205,7 @@
     <Compile Include="Repository\ITrackingDetails.cs" />
     <Compile Include="Repository\TrackingRepository.cs" />
     <Compile Include="ViewModels\IndexViewModel.cs" />
+    <Compile Include="ViewModels\TrackConsignmentViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\themes\base\images\animated-overlay.gif" />
@@ -326,6 +327,7 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Web.config" />
+    <Content Include="Views\Home\TrackConsignment.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -351,7 +353,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>54865</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:54865/</IISUrl>
+          <IISUrl>http://localhost:54866/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

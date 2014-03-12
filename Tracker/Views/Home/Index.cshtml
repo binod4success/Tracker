@@ -10,13 +10,13 @@
                 <h2>@ViewBag.Message</h2>
             </hgroup>
             <p>
-                Track your men working in the field                
+                Track your men working in the field
             </p>
         </div>
     </section>
 }
 <h3>Showing List:</h3>
-<table>
+<table class="grid-style">
     <thead>
         <tr>
             <th>Tracking ID</th>
@@ -32,7 +32,7 @@
         @foreach (var item in Model.ConsignmentList)
         {
             <tr>
-                <td>@item.TrackingId</td>
+                <td>@Html.ActionLink(item.TrackingId, "TrackConsignment", "Home", new { TrackingId = item.TrackingId }, null)</td>
                 <td>@item.Status</td>
                 <td>@item.Remarks</td>
                 <td>@item.AssignDateTime</td>
@@ -46,10 +46,47 @@
                     @item.Destination.Country
                     @item.Destination.PinCode
                     @item.Destination.LandMark
-                    <br />@item.Destination.GeoLocation.Latitude
-                    <br />@item.Destination.GeoLocation.Longitude
+                    <br />
+                    <span data-geo-url="@string.Format("http://maps.google.com/maps/api/staticmap?zoom=18&size=300x300&maptype=satellite&sensor=false&center={0},{1}", item.Destination.GeoLocation.Latitude, item.Destination.GeoLocation.Longitude)" class="ui-icon ui-icon-image" style="cursor:pointer; display:inline-block"></span><span>Map</span>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@section scripts{
+    <style type="text/css">
+        .map {
+            width: 305px;
+            height: 305px;
+            border: 5px solid gray;
+            border-radius: 10px;
+        }
+
+        .ui-tooltip {
+            max-width: 305px;
+        }
+    </style>
+
+    <script type="text/javascript">
+        $(function () {
+            $(document).tooltip({
+                items: "[data-geo-url]",
+                track: true,
+                position: {
+                    my: "left top",
+                    at: "left bottom"
+                },
+                content: function () {
+                    var element = $(this);
+                    if (element.is("[data-geo-url]")) {
+                        return "<img class='map' alt='map' src='" + element.attr('data-geo-url') + "'>";
+                    }
+                }, show: {
+                    effect: "slideDown",
+                    delay: 500
+                }
+            });
+        });
+    </script>
+}

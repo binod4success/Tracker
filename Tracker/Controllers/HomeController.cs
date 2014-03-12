@@ -22,6 +22,17 @@ namespace Tracker.Controllers
             return View(model);
         }
 
+        public ActionResult TrackConsignment(string TrackingId)
+        {
+            var model = new TrackConsignmentViewModel
+            {
+                TrackingId = TrackingId,
+                TrackingLocations = _repos.GetTrackingDetails(TrackingId)
+            };
+
+            return View(model);
+        }
+
         public ActionResult About()
         {
             ViewBag.Message = "Your app description page.";

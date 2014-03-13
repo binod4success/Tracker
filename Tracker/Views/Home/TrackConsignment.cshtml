@@ -1,8 +1,7 @@
 ﻿@model Tracker.ViewModels.TrackConsignmentViewModel
 @{
-    ViewBag.Title = "TrackConsignment";
+    ViewBag.Title = "TrackConsignment";    
     var locations = Json.Encode(Model.TrackingLocations.Select(p => p.Locations));
-
 }
 
 <input type="hidden" id="hfLocations" value='@Html.Raw(locations)' />
@@ -20,12 +19,7 @@
     <tbody>
         <tr>
             <td width="80%" rowspan="@(Model.TrackingLocations.Count + 1)">
-                <div id="map-canvas" style="width: 100%; height: 600px"></div>
-                @*@item.Locations.Latitude
-                    @item.Locations.Longitude*@
-                <br />
-                @*<span data-geo-url="@string.Format("http://maps.google.com/maps/api/staticmap?zoom=18&size=300x300&maptype=satellite&sensor=false&center={0},{1}", item.Locations.Latitude, item.Locations.Longitude)"
-                    class="ui-icon ui-icon-image" style="cursor:pointer; display:inline-block"></span><span>Map</span>*@
+                <div id="map_canvas" style="width: 100%; height: 600px"></div>
             </td>
         </tr>
         @foreach (var item in Model.TrackingLocations)
@@ -48,28 +42,19 @@
             border: 5px solid gray;
             border-radius: 10px;
         }
-
-        .ui-tooltip {
-            max-width: 305px;
-        }
     </style>
+    @Styles.Render("~/Content/css/NavigatorPulsate")
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
     <script type="text/javascript">
         function initialize() {
             var mapOptions = {
                 zoom: 3,
                 center: new google.maps.LatLng(32.71533, -117.15726),
-                mapTypeId: google.maps.MapTypeId.TERRAIN
+                mapTypeId: google.maps.MapTypeId.ROADMAP
             };
             // Creating a LatLngBounds object
             var bounds = new google.maps.LatLngBounds();
-            var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-            //var flightPlanCoordinates = [
-            //  new google.maps.LatLng(37.772323, -122.214897),
-            //  new google.maps.LatLng(21.291982, -157.821856),
-            //  new google.maps.LatLng(-18.142599, 178.431),
-            //  new google.maps.LatLng(-27.46758, 153.027892)
-            //];
+            var map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
             var data = $.parseJSON($('#hfLocations').val());
             var flightPlanCoordinates = [];
             $.each(data, function (key, item) {
@@ -78,50 +63,53 @@
             var flightPath = new google.maps.Polyline({
                 path: flightPlanCoordinates,
                 geodesic: true,
-                strokeColor: '#FF0000',
+                strokeColor: '#3a79c8',
                 strokeOpacity: 1.0,
                 strokeWeight: 2
             });
             flightPath.setMap(map);
 
-            var markerImage = {
-                //url: 'Images/mapLocationMarkerImage.png',
-                // This marker is 20 pixels wide by 32 pixels tall.
-                size: new google.maps.Size(50, 50),
-            };
-            for (var i = 0; i < places.length; i++) {
-                // Adding the markers
+            // Adding the markers
+            for (var i = 0; i < flightPlanCoordinates.length - 1 ; i++) {
+                // build entire marker first time thru
                 var marker = new google.maps.Marker({
-                    position: places[i],
-                    map: map,
-                    //icon: markerImage,
-                    title: data[i].Name
+                    position: flightPlanCoordinates[i],
+                    map: map
                 });
-
-                // Extending the bounds object with each LatLng
-                bounds.extend(places[i]);
+                bounds.extend(flightPlanCoordinates[i]);
             }
+            //Remove last location from array to show it as current location with navigator
+            var LastLocation = flightPlanCoordinates.pop();
+            MarkLastLocation(LastLocation, map);
+            // Extending the bounds object with each LatLng
+            bounds.extend(LastLocation);
+            // Adjusting the map to new bounding box
+            map.fitBounds(bounds);
+        }
+
+        function MarkLastLocation(LastLocation, map) {
+            // define our custom marker image
+            var image = new google.maps.MarkerImage(
+                'http://plebeosaur.us/etc/map/bluedot_retina.png',
+                null, // size
+                null, // origin
+                new google.maps.Point(8, 8), // anchor (move to center of marker)
+                new google.maps.Size(17, 17) // scaled size (required for Retina display icon)
+            );
+            // then create the new marker
+            myMarker = new google.maps.Marker({
+                flat: true,
+                icon: image,
+                map: map,
+                optimized: false,
+                position: LastLocation,
+                title: 'I might be here',
+                visible: true
+            });
+
+            // Adding the markers
+            myMarker.setPosition(LastLocation);
         }
         google.maps.event.addDomListener(window, 'load', initialize);
-
-        $(function () {
-            $(document).tooltip({
-                items: "[data-geo-url]",
-                track: true,
-                position: {
-                    my: "left top",
-                    at: "left bottom"
-                },
-                content: function () {
-                    var element = $(this);
-                    if (element.is("[data-geo-url]")) {
-                        return "<img class='map' alt='map' src='" + element.attr('data-geo-url') + "'>";
-                    }
-                }, show: {
-                    effect: "slideDown",
-                    delay: 500
-                }
-            });
-        });
     </script>
 }

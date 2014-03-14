@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Tracker.Models;
 using Tracker.Repository;
 using Tracker.ViewModels;
 
@@ -26,9 +27,18 @@ namespace Tracker.Controllers
         {
             var model = new TrackConsignmentViewModel
             {
-                TrackingId = TrackingId,
-                TrackingLocations = _repos.GetTrackingDetails(TrackingId)
+                TrackingId = TrackingId
             };
+            if (string.IsNullOrWhiteSpace(TrackingId))
+            {
+                model.TrackingLocations = new List<TrackingDetails>();
+            }
+            else
+            {
+                model.TrackingLocations = _repos.GetTrackingDetails(TrackingId);
+            }
+
+
 
             return View(model);
         }

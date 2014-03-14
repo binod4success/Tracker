@@ -2,21 +2,26 @@
 @{
     ViewBag.Title = "Home Page";
 }
-@section featured {
-    <section class="featured">
-        <div class="content-wrapper">
-            <hgroup class="title">
-                <h1>@ViewBag.Title.</h1>
-                <h2>@ViewBag.Message</h2>
-            </hgroup>
-            <p>
-                Track your men working in the field
-            </p>
-        </div>
-    </section>
-}
-<h3>Showing List:</h3>
+@*@section featured {
+        <section class="featured">
+            <div class="content-wrapper">
+                <hgroup class="title">
+                    <h1>@ViewBag.Title.</h1>
+                    <h2>@ViewBag.Message</h2>
+                </hgroup>
+                <p>
+                    Track your men working in the field
+                </p>
+            </div>
+        </section>
+    }*@
 <table class="grid-style">
+    <caption>
+        <form action="/Home/TrackConsignment" method="get">
+            <span>Showing List</span>
+            <span style="float:right; padding-right:10px;">Search <input type="text" name="TrackingId" style="width:8em;font-size:0.9em;" /> <button id="btnSearch" style="height:1.6em;"></button></span>
+        </form>
+    </caption>
     <thead>
         <tr>
             <th>Tracking ID</th>
@@ -70,6 +75,12 @@
 
     <script type="text/javascript">
         $(function () {
+            $("#btnSearch").button({
+                icons: {
+                    primary: "ui-icon-search"
+                },
+                text: false
+            });
             $(document).tooltip({
                 items: "[data-geo-url]",
                 track: true,

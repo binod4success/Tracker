@@ -1,19 +1,26 @@
 ﻿@model Tracker.ViewModels.TrackConsignmentViewModel
 @{
-    ViewBag.Title = "TrackConsignment";    
-    var locations = Json.Encode(Model.TrackingLocations.Select(p => p.Locations));
+    ViewBag.Title = "TrackConsignment";
+    var trackingDetails = Json.Encode(Model.TrackingLocations);
 }
 
-<input type="hidden" id="hfLocations" value='@Html.Raw(locations)' />
+<input type="hidden" id="hfTrackingDetails" value='@Html.Raw(trackingDetails)' />
 
-<h2>Consignment Tracking Number: @Model.TrackingId </h2>
+@*<h3>Consignment Tracking Number: @Html.TextBoxFor(m => m.TrackingId) </h3>*@
 
-<h3>Locations List:</h3>
+
+<form action="/Home/TrackConsignment" method="get">
+    <label for="TrackingId" style="display:inline-block">Consignment Tracking Number</label>
+    <input type="text" name="TrackingId" value="@Model.TrackingId" /> <button id="btnSearch" style="height:2.2em;"></button>
+</form>
+
+
 <table class="grid-style">
+    <caption>Locations List</caption>
     <thead>
         <tr>
-            <th>Time</th>
             <th>Location</th>
+            <th>Time</th>
         </tr>
     </thead>
     <tbody>
@@ -30,7 +37,6 @@
                 </td>
             </tr>
         }
-
     </tbody>
 </table>
 
@@ -46,6 +52,17 @@
     @Styles.Render("~/Content/css/NavigatorPulsate")
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
     <script type="text/javascript">
+        $(function () {
+            $("#btnSearch").button({
+                icons: {
+                    primary: "ui-icon-search"
+                },
+                text: false
+            });
+        });
+
+
+
         function initialize() {
             var mapOptions = {
                 zoom: 3,
@@ -55,31 +72,32 @@
             // Creating a LatLngBounds object
             var bounds = new google.maps.LatLngBounds();
             var map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
-            var data = $.parseJSON($('#hfLocations').val());
-            var flightPlanCoordinates = [];
+            var data = $.parseJSON($('#hfTrackingDetails').val());
+            var TrackingCoordinates = [];
             $.each(data, function (key, item) {
-                flightPlanCoordinates.push(new google.maps.LatLng(item["Latitude"], item["Longitude"]));
+                TrackingCoordinates.push(new google.maps.LatLng(item["Locations"]["Latitude"], item["Locations"]["Longitude"]));
             });
-            var flightPath = new google.maps.Polyline({
-                path: flightPlanCoordinates,
+            var TrackingPath = new google.maps.Polyline({
+                path: TrackingCoordinates,
                 geodesic: true,
                 strokeColor: '#3a79c8',
                 strokeOpacity: 1.0,
                 strokeWeight: 2
             });
-            flightPath.setMap(map);
+            TrackingPath.setMap(map);
 
             // Adding the markers
-            for (var i = 0; i < flightPlanCoordinates.length - 1 ; i++) {
+            for (var i = 0; i < TrackingCoordinates.length - 1 ; i++) {
                 // build entire marker first time thru
                 var marker = new google.maps.Marker({
-                    position: flightPlanCoordinates[i],
-                    map: map
+                    position: TrackingCoordinates[i],
+                    map: map,
+                    //title: TrackSequences[i]
                 });
-                bounds.extend(flightPlanCoordinates[i]);
+                bounds.extend(TrackingCoordinates[i]);
             }
             //Remove last location from array to show it as current location with navigator
-            var LastLocation = flightPlanCoordinates.pop();
+            var LastLocation = TrackingCoordinates.pop();
             MarkLastLocation(LastLocation, map);
             // Extending the bounds object with each LatLng
             bounds.extend(LastLocation);

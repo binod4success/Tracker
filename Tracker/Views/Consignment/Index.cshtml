@@ -1,0 +1,58 @@
+﻿@model Tracker.ViewModels.ConsignmentViewModel
+@{
+    ViewBag.Title = "Index";
+}
+<h3>Add New Consignment</h3>
+<br />
+<div>
+    @using (Html.BeginForm("AddConsignment", "Consignment", FormMethod.Post))
+    {
+        @Html.LabelFor(m => m.NewConsignment.TrackingId)
+        @Html.TextBoxFor(m => m.NewConsignment.TrackingId, new { @readonly = "readonly" })
+
+        @Html.LabelFor(m => m.NewConsignment.ContactNumber)
+        @Html.TextBoxFor(m => m.NewConsignment.ContactNumber)
+
+        @Html.LabelFor(m => m.NewConsignment.Remarks)
+        @Html.TextBoxFor(m => m.NewConsignment.Remarks)
+
+        @Html.LabelFor(m => m.NewConsignment.Status)
+        @Html.TextBoxFor(m => m.NewConsignment.Status)
+
+        @Html.LabelFor(m => m.NewConsignment.Destination.AddressLine1)
+        @Html.TextBoxFor(m => m.NewConsignment.Destination.AddressLine1)
+
+        @Html.LabelFor(m => m.NewConsignment.Destination.AddressLine2)
+        @Html.TextBoxFor(m => m.NewConsignment.Destination.AddressLine2)
+
+        @Html.LabelFor(m => m.NewConsignment.Destination.City)
+        @Html.TextBoxFor(m => m.NewConsignment.Destination.City)
+
+        @Html.LabelFor(m => m.NewConsignment.Destination.State)
+        @Html.TextBoxFor(m => m.NewConsignment.Destination.State)
+
+        @Html.LabelFor(m => m.NewConsignment.Destination.PinCode)
+        @Html.TextBoxFor(m => m.NewConsignment.Destination.PinCode)
+
+        @Html.LabelFor(m => m.NewConsignment.Destination.Country)
+        @Html.TextBoxFor(m => m.NewConsignment.Destination.Country)
+
+        @Html.HiddenFor(m => m.NewConsignment.Destination.GeoLocation.Latitude)
+        @Html.HiddenFor(m => m.NewConsignment.Destination.GeoLocation.Longitude)
+
+        <input id="btnSave" type="submit" value="Save" />
+    }
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $("#btnSave").button({
+                icons: {
+                    primary: "ui-icon-disk"
+                },
+                text: true
+            });
+        });
+    </script>
+}

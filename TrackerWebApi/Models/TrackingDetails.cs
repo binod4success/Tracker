@@ -9,6 +9,8 @@ namespace TrackerWebApi.Models
     {
         public int JobId { get; set; }
 
+        public int TrackSequence { get; set; }
+
         public DateTime TrackingDateTime { get; set; }
 
         public GeoLocation Locations { get; set; }

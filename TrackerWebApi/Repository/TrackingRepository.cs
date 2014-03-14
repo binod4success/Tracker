@@ -38,6 +38,7 @@ namespace TrackerWebApi.Repository
                  SELECT TrackingDetails.Longitude, 
                         TrackingDetails.Latitude, 
                         TrackingDetails.JobId, 
+                        TrackingDetails.SequenceId,
                         TrackingDetails.TrackingDateTime
                    FROM TrackingDetails
              INNER JOIN Job ON TrackingDetails.JobId = Job.JobId 
@@ -55,6 +56,7 @@ namespace TrackerWebApi.Repository
                     var data = new TrackingDetails
                     {
                         JobId = Int32.Parse(reader["JobId"].ToString()),
+                        TrackSequence = Int32.Parse(reader["SequenceId"].ToString()),
                         Locations = new GeoLocation
                         {
                             Latitude = reader["Latitude"].ToString(),

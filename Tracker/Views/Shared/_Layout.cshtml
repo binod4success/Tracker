@@ -20,14 +20,42 @@
                 <section id="login">
                     @Html.Partial("_LoginPartial")
                 </section>
-                <nav>
-                    <ul id="menu">
-                        <li>@Html.ActionLink("Home", "Index", "Home")</li>
-                        <li>@Html.ActionLink("About", "About", "Home")</li>
-                        <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                    </ul>
-                </nav>
             </div>
+            <div id="menu">
+                <ul class="menu">
+                    <li>
+                        <a href="/Home/Index" class="parent"><span>Home</span></a>
+                        <div>
+                            <ul>
+                                <li><a href="#"><span>Sub Item 1</span></a></li>
+                                <li><a href="#"><span>Sub Item 2</span></a></li>
+                                <li><a href="#"><span>Sub Item 3</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <a href="#" class="parent"><span>Manage</span></a>
+                        <div class="columns two">
+                            <ul class="one">
+                                <li><a href="/Consignment/Index"><span>New Consignment</span></a></li>
+                                <li><a href="/Consignment/EditConsignment"><span>Edit Consignment</span></a></li>
+                                <li><a href="#"><span>Delete Consignment</span></a></li>
+                                <li><a href="/Home/TrackConsignment"><span>Track Consignment</span></a></li>
+                                <li><a href="#"><span>Reschedule Consignment</span></a></li>
+                            </ul>
+                            <ul class="two">
+                                <li><a href="#"><span>New Postman</span></a></li>
+                                <li><a href="#"><span>Edit Postman Details</span></a></li>
+                                <li><a href="#"><span>Delete Postman Details</span></a></li>
+                                <li><a href="#"><span>Track Postman</span></a></li>
+                                <li><a href="#"><span>Postman Job List</span></a></li>                                
+                            </ul>
+                        </div>
+                    </li>
+                    <li><a href="/Home/About"><span>About</span></a></li>
+                    <li class="last"><a href="/Home/Contact"><span>Contacts</span></a></li>                    
+                </ul>
+            </div>           
         </div>
     </header>
     <div id="body">
@@ -39,13 +67,14 @@
     <footer>
         <div class="content-wrapper">
             <div class="float-left">
-                <p>&copy; @DateTime.Now.Year - My ASP.NET MVC Application</p>
+                <p>&copy; @DateTime.Now.Year - Tracker</p>
             </div>
         </div>
     </footer>
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/menu")
     @RenderSection("scripts", required: false)
 </body>
 </html>

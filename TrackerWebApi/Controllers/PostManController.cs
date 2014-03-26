@@ -13,31 +13,31 @@ namespace TrackerWebApi.Controllers
     {
         private static readonly IPostMan _repos = new PostManRepository();
 
-        // GET api/postman
-        public IEnumerable<string> Get()
+        // GET api/postman/Get
+        public IEnumerable<PostMan> Get()
         {
-            return new string[] { "value1", "value2" };
+            return _repos.GetPostManList();
         }
 
-        // GET api/postman/5
+        // GET api/postman/Get?postManId=5
         public PostMan Get(string postManId)
         {
             return _repos.GetPostManInfo(postManId);
         }
 
-        // POST api/postman
+        // POST api/postman/Post
         public void Post(PostMan value)
         {
             _repos.InsertPostManInfo(value);
         }
 
-        // PUT api/postman/5
+        // PUT api/postman/Put
         public void Put(string postManId, PostMan value)
         {
             _repos.UpdatePostManInfo(value);
         }
 
-        // DELETE api/postman/5
+        // DELETE api/postman/Delete?postManId=5
         public void Delete(string postManId)
         {
             _repos.DeletePostManInfo(postManId);

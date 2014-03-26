@@ -11,7 +11,7 @@ namespace TrackerWebApi.Repository
     {
         Address GetAddress(string addressId);
 
-        int InsertAddress(Address address);
+        int? InsertAddress(Address address);
 
         void UpdateAddress(Address address);
 

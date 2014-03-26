@@ -13,6 +13,8 @@ namespace Tracker.Controllers
     {
         private static readonly ITrackingDetails _repos = new TrackingRepository();
 
+        private static readonly IJob _jobRepos = new JobRepository();
+
         public ActionResult Index()
         {
             ViewBag.Message = "List of the currently working postmen in field.";
@@ -37,10 +39,40 @@ namespace Tracker.Controllers
             {
                 model.TrackingLocations = _repos.GetTrackingDetails(TrackingId);
             }
+            return View(model);
+        }
 
+        public ActionResult TrackMe(string jobId)
+        {
+            if (string.IsNullOrWhiteSpace(jobId))
+            {
+                ModelState.AddModelError("jobId", "JobId was missing.");
+                return RedirectToAction("Tracker");
+            }
+            var job = _jobRepos.GetJob(jobId);
+            var model = new TrackMeViewModel
+            {
+                JobId = Int32.Parse(jobId),
+                Consignment = job.Consignment,
+                Me = job.PostMan
+            };
+            return View(model);
+        }
 
+        public ActionResult Tracker()
+        {
+            var model = new TrackerViewModel
+            {
+                TaskList = _jobRepos.GetJobList()
+            };
 
             return View(model);
+        }
+
+        public JsonResult GetCurrentLocation(string trackingId)
+        {
+            var location = _repos.GetCurrentLocation(trackingId);
+            return Json(location, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult About()

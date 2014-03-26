@@ -9,6 +9,8 @@ namespace TrackerWebApi.Repository
 {
     interface IJob
     {
+        IList<Job> GetJobs();
+
         Job GetJob(string jobId);
 
         void InsertJob(Job job);

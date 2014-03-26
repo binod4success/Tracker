@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
@@ -63,7 +64,7 @@ namespace TrackerWebApi.Repository
             return addresses.FirstOrDefault();
         }
 
-        public int InsertAddress(Address address)
+        public int? InsertAddress(Address address)
         {
             if (address == null)
             {
@@ -92,26 +93,33 @@ namespace TrackerWebApi.Repository
                         @Longitude);
 
                 SELECT SCOPE_IDENTITY();
-                GO";
-
-            using (SqlConnection _dbConnection = new SqlConnection(connectionString))
+                ";
+            try
             {
-                SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
+                using (SqlConnection _dbConnection = new SqlConnection(connectionString))
+                {
+                    SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
 
-                SqlHelper.AddParameter(ref cmd, "@AddressLine1", SqlDbType.VarChar, address.AddressLine1);
-                SqlHelper.AddParameter(ref cmd, "@AddressLine2", SqlDbType.VarChar, address.AddressLine2);
-                SqlHelper.AddParameter(ref cmd, "@LandMark", SqlDbType.VarChar, address.LandMark);
-                SqlHelper.AddParameter(ref cmd, "@City", SqlDbType.VarChar, address.City);
-                SqlHelper.AddParameter(ref cmd, "@State", SqlDbType.VarChar, address.State);
-                SqlHelper.AddParameter(ref cmd, "@Country", SqlDbType.VarChar, address.Country);
-                SqlHelper.AddParameter(ref cmd, "@PinCode", SqlDbType.VarChar, address.PinCode);
-                SqlHelper.AddParameter(ref cmd, "@Latitude", SqlDbType.Decimal, address.GeoLocation.Latitude);
-                SqlHelper.AddParameter(ref cmd, "@Longitude", SqlDbType.Decimal, address.GeoLocation.Longitude);
+                    SqlHelper.AddParameter(ref cmd, "@AddressLine1", SqlDbType.VarChar, address.AddressLine1);
+                    SqlHelper.AddParameter(ref cmd, "@AddressLine2", SqlDbType.VarChar, address.AddressLine2);
+                    SqlHelper.AddParameter(ref cmd, "@LandMark", SqlDbType.VarChar, address.LandMark);
+                    SqlHelper.AddParameter(ref cmd, "@City", SqlDbType.VarChar, address.City);
+                    SqlHelper.AddParameter(ref cmd, "@State", SqlDbType.VarChar, address.State);
+                    SqlHelper.AddParameter(ref cmd, "@Country", SqlDbType.VarChar, address.Country);
+                    SqlHelper.AddParameter(ref cmd, "@PinCode", SqlDbType.VarChar, address.PinCode);
+                    SqlHelper.AddParameter(ref cmd, "@Latitude", SqlDbType.VarChar, address.GeoLocation.Latitude);
+                    SqlHelper.AddParameter(ref cmd, "@Longitude", SqlDbType.VarChar, address.GeoLocation.Longitude);
 
-                _dbConnection.Open();
-                var AddressId = Int32.Parse(cmd.ExecuteScalar().ToString());
-                return AddressId;
+                    _dbConnection.Open();
+                    var AddressId = Int32.Parse(cmd.ExecuteScalar().ToString());
+                    return AddressId;
+                }
             }
+            catch (DbException ex)
+            {
+                throw ex;
+            }
+
         }
 
         public void UpdateAddress(Address address)
@@ -136,7 +144,7 @@ namespace TrackerWebApi.Repository
                           WHERE [AddressId] = @AddressId ";
 
                 SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
-                SqlHelper.AddParameter(ref cmd, "@AddressId", SqlDbType.VarChar, address.AddressId);
+                SqlHelper.AddParameter(ref cmd, "@AddressId", SqlDbType.Int, address.AddressId);
                 SqlHelper.AddParameter(ref cmd, "@AddressLine1", SqlDbType.VarChar, address.AddressLine1);
                 SqlHelper.AddParameter(ref cmd, "@AddressLine2", SqlDbType.VarChar, address.AddressLine2);
                 SqlHelper.AddParameter(ref cmd, "@LandMark", SqlDbType.VarChar, address.LandMark);
@@ -144,8 +152,8 @@ namespace TrackerWebApi.Repository
                 SqlHelper.AddParameter(ref cmd, "@State", SqlDbType.VarChar, address.State);
                 SqlHelper.AddParameter(ref cmd, "@Country", SqlDbType.VarChar, address.Country);
                 SqlHelper.AddParameter(ref cmd, "@PinCode", SqlDbType.VarChar, address.PinCode);
-                SqlHelper.AddParameter(ref cmd, "@Latitude", SqlDbType.Decimal, address.GeoLocation.Latitude);
-                SqlHelper.AddParameter(ref cmd, "@Longitude", SqlDbType.Decimal, address.GeoLocation.Longitude);
+                SqlHelper.AddParameter(ref cmd, "@Latitude", SqlDbType.VarChar, address.GeoLocation.Latitude);
+                SqlHelper.AddParameter(ref cmd, "@Longitude", SqlDbType.VarChar, address.GeoLocation.Longitude);
 
                 _dbConnection.Open();
                 cmd.ExecuteNonQuery();

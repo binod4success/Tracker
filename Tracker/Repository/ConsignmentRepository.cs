@@ -19,7 +19,7 @@ namespace Tracker.Repository
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 // HTTP GET
-                HttpResponseMessage response = client.GetAsync(string.Format("api/Tracking?trackingId={0}", consignmentId)).Result;
+                HttpResponseMessage response = client.GetAsync(string.Format("api/Tracking/Get?trackingId={0}", consignmentId)).Result;
                 if (response.IsSuccessStatusCode)
                 {
                     Consignment info = response.Content.ReadAsAsync<Consignment>().Result;
@@ -39,7 +39,7 @@ namespace Tracker.Repository
             {
                 client.BaseAddress = new Uri("http://localhost:54865/");
                 client.DefaultRequestHeaders.Accept.Clear();
-                var response = client.PostAsJsonAsync("api/Consignment", consignment).Result;
+                var response = client.PostAsJsonAsync("api/Consignment/Post", consignment).Result;
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception(string.Format("Error-Status Code: {0}. {1}", response.StatusCode, response.ReasonPhrase));
@@ -49,12 +49,31 @@ namespace Tracker.Repository
 
         public void UpdateConsignment(Models.Consignment consignment)
         {
-            throw new NotImplementedException();
+            // HTTP POST
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:54865/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                var response = client.PutAsJsonAsync("api/Consignment/Put", consignment).Result;
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception(string.Format("Error-Status Code: {0}. {1}", response.StatusCode, response.ReasonPhrase));
+                }
+            }
         }
 
         public void DeleteConsignment(string consignmentId)
         {
-            throw new NotImplementedException();
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:54865/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                var response = client.DeleteAsync(string.Format("api/Consignment/Delete?id={0}", consignmentId)).Result;
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception(string.Format("Error-Status Code: {0}. {1}", response.StatusCode, response.ReasonPhrase));
+                }
+            }
         }
     }
 }

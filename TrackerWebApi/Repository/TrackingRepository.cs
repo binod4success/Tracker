@@ -23,9 +23,36 @@ namespace TrackerWebApi.Repository
             throw new NotImplementedException();
         }
 
-        public GeoLocation UpdateLocation(string trackingId, GeoLocation location)
+        public void InsertNewLocation(string jobId, GeoLocation location)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(jobId))
+            {
+                throw new ArgumentNullException("jobId");
+            }
+            using (SqlConnection _dbConnection = new SqlConnection(connectionString))
+            {
+                var QUERY = @"
+                           INSERT INTO [Tracker].[dbo].[TrackingDetails]
+                                      ([Longitude],
+                                       [Latitude],
+                                       [JobId],
+                                       [TrackingDateTime])
+                               VALUES
+                                      (@Longitude,
+                                       @Latitude,
+                                       @JobId,                                       
+                                       @TrackingDateTime)";
+
+                SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
+
+                SqlHelper.AddParameter(ref cmd, "@Longitude", SqlDbType.VarChar, location.Longitude);
+                SqlHelper.AddParameter(ref cmd, "@Latitude", SqlDbType.VarChar, location.Latitude);
+                SqlHelper.AddParameter(ref cmd, "@JobId", SqlDbType.Int, jobId);
+                SqlHelper.AddParameter(ref cmd, "@TrackingDateTime", SqlDbType.DateTime, System.DateTime.Now);
+
+                _dbConnection.Open();
+                cmd.ExecuteNonQuery();
+            }
         }
 
         public IList<TrackingDetails> GetTrackingDetails(string trackingId)

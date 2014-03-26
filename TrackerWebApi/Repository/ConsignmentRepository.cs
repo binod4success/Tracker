@@ -40,13 +40,14 @@ namespace TrackerWebApi.Repository
             var consignments = new List<Consignment>();
             using (SqlConnection _dbConnection = new SqlConnection(connectionString))
             {
-                SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = _dbConnection;
                 if (consignmentId.HasValue)
                 {
                     cmd.Parameters.Add("@ConsignmentId", SqlDbType.Int).Value = consignmentId.Value;
-                    QUERY += "WHERE [ConsignmentId] = @ConsignmentId";
+                    QUERY += " WHERE [ConsignmentId] = @ConsignmentId";
                 }
-
+                cmd.CommandText = QUERY;
                 _dbConnection.Open();
                 var reader = cmd.ExecuteReader();
                 while (reader.Read())
@@ -112,12 +113,14 @@ namespace TrackerWebApi.Repository
             }
             using (SqlConnection _dbConnection = new SqlConnection(connectionString))
             {
-                using (var trans = _dbConnection.BeginTransaction())
+                try
                 {
-                    try
+                    var addressId = _addressRepos.InsertAddress(consignment.Destination);
+                    if (addressId == null)
                     {
-                        var addressId = _addressRepos.InsertAddress(consignment.Destination);
-                        var QUERY = @"
+                        throw new Exception("Error: Address couldn't be updated now.");
+                    }
+                    var QUERY = @"
                            INSERT INTO [Tracker].[dbo].[Consignment]
                                       ([TrackingId],
                                        [Status],
@@ -135,24 +138,21 @@ namespace TrackerWebApi.Repository
                                        @AssignDateTime,
                                        @DeliveryDateTime)";
 
-                        SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
+                    SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
 
-                        SqlHelper.AddParameter(ref cmd, "@TrackingId", SqlDbType.VarChar, consignment.TrackingId);
-                        SqlHelper.AddParameter(ref cmd, "@Status", SqlDbType.VarChar, consignment.Status);
-                        SqlHelper.AddParameter(ref cmd, "@Remarks", SqlDbType.VarChar, consignment.Remarks);
-                        SqlHelper.AddParameter(ref cmd, "@AddressId", SqlDbType.Int, addressId);
-                        SqlHelper.AddParameter(ref cmd, "@ContactNumber", SqlDbType.VarChar, consignment.ContactNumber);
-                        SqlHelper.AddParameter(ref cmd, "@AssignDateTime", SqlDbType.DateTime, consignment.AssignDateTime);
-                        SqlHelper.AddParameter(ref cmd, "@DeliveryDateTime", SqlDbType.DateTime, consignment.DeliveryDateTime);
-
-                        _dbConnection.Open();
-                        cmd.ExecuteNonQuery();
-                        trans.Commit();
-                    }
-                    catch (Exception)
-                    {
-                        trans.Rollback();
-                    }
+                    SqlHelper.AddParameter(ref cmd, "@TrackingId", SqlDbType.VarChar, consignment.TrackingId);
+                    SqlHelper.AddParameter(ref cmd, "@Status", SqlDbType.VarChar, consignment.Status);
+                    SqlHelper.AddParameter(ref cmd, "@Remarks", SqlDbType.VarChar, consignment.Remarks);
+                    SqlHelper.AddParameter(ref cmd, "@AddressId", SqlDbType.Int, addressId);
+                    SqlHelper.AddParameter(ref cmd, "@ContactNumber", SqlDbType.VarChar, consignment.ContactNumber);
+                    SqlHelper.AddParameter(ref cmd, "@AssignDateTime", SqlDbType.DateTime, consignment.AssignDateTime);
+                    SqlHelper.AddParameter(ref cmd, "@DeliveryDateTime", SqlDbType.DateTime, consignment.DeliveryDateTime);
+                    _dbConnection.Open();
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
                 }
             }
         }
@@ -165,13 +165,11 @@ namespace TrackerWebApi.Repository
             }
             using (SqlConnection _dbConnection = new SqlConnection(connectionString))
             {
-                using (var trans = _dbConnection.BeginTransaction())
+                try
                 {
-                    try
-                    {
-                        _addressRepos.UpdateAddress(consignment.Destination);
+                    _addressRepos.UpdateAddress(consignment.Destination);
 
-                        string QUERY = @"
+                    string QUERY = @"
                             UPDATE [Tracker].[dbo].[Consignment]
                                SET [TrackingId] = @TrackingId,
                                    [Status] = @Status,
@@ -181,31 +179,29 @@ namespace TrackerWebApi.Repository
                                    [DeliveryDateTime] = @DeliveryDateTime
                              WHERE [ConsignmentId] = @ConsignmentId";
 
-                        SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
+                    SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
 
-                        SqlHelper.AddParameter(ref cmd, "@TrackingId", SqlDbType.Int, consignment.TrackingId);
-                        SqlHelper.AddParameter(ref cmd, "@Status", SqlDbType.VarChar, consignment.Status);
-                        SqlHelper.AddParameter(ref cmd, "@Remarks", SqlDbType.VarChar, consignment.Remarks);
-                        SqlHelper.AddParameter(ref cmd, "@ContactNumber", SqlDbType.VarChar, consignment.ContactNumber);
-                        SqlHelper.AddParameter(ref cmd, "@AssignDateTime", SqlDbType.DateTime, consignment.AssignDateTime);
-                        SqlHelper.AddParameter(ref cmd, "@DeliveryDateTime", SqlDbType.DateTime, consignment.DeliveryDateTime);
-                        SqlHelper.AddParameter(ref cmd, "@ConsignmentId", SqlDbType.VarChar, consignment.ConsignmentId);
+                    SqlHelper.AddParameter(ref cmd, "@TrackingId", SqlDbType.VarChar, consignment.TrackingId);
+                    SqlHelper.AddParameter(ref cmd, "@Status", SqlDbType.VarChar, consignment.Status);
+                    SqlHelper.AddParameter(ref cmd, "@Remarks", SqlDbType.VarChar, consignment.Remarks);
+                    SqlHelper.AddParameter(ref cmd, "@ContactNumber", SqlDbType.VarChar, consignment.ContactNumber);
+                    SqlHelper.AddParameter(ref cmd, "@AssignDateTime", SqlDbType.DateTime, consignment.AssignDateTime);
+                    SqlHelper.AddParameter(ref cmd, "@DeliveryDateTime", SqlDbType.DateTime, consignment.DeliveryDateTime);
+                    SqlHelper.AddParameter(ref cmd, "@ConsignmentId", SqlDbType.Int, consignment.ConsignmentId);
 
-                        _dbConnection.Open();
-                        cmd.ExecuteNonQuery();
-                        trans.Commit();
-                    }
-                    catch (Exception)
-                    {
-                        trans.Rollback();
-                    }
+                    _dbConnection.Open();
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
                 }
             }
         }
 
         public void DeleteConsignment(string consignmentId)
         {
-            const string QUERY = @" [Tracker].[dbo].[Consignment] WHERE ConsignmentId = @ConsignmentId";
+            const string QUERY = @" DELETE FROM [Tracker].[dbo].[Consignment] WHERE [ConsignmentId] = @ConsignmentId";
             using (SqlConnection _dbConnection = new SqlConnection(connectionString))
             {
                 SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);

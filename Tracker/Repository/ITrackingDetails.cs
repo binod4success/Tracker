@@ -12,5 +12,9 @@ namespace Tracker.Repository
         IList<Consignment> GetAllConsignmentDetails();
 
         IList<TrackingDetails> GetTrackingDetails(string trackingId);
+
+        TrackingDetails GetCurrentLocation(string trackingId);
+        
+        void UpdateLocation(TrackingDetails trackingDetails);
     }
 }

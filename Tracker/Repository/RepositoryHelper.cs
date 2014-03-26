@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.EnterpriseServices;
 using System.Linq;
 using System.Web;
 
@@ -18,6 +19,29 @@ namespace Tracker.Repository
                 strRandom += strCharSet.Substring(iRandom, 1);
             }
             return strRandom;
+        }
+
+        public static string GetJobStatus(int statusId)
+        {
+            return Enum.Parse(typeof(StatusEnum), statusId.ToString()).ToString();
+        }
+
+        internal enum StatusEnum
+        {
+            New = 0,
+
+            Inprogress = 1,
+
+            Delivered = 2,
+
+            Hold = 3,
+
+            Cancel = 4
+        }
+
+        internal static IList<System.Web.Mvc.SelectListItem> GetJobStatusList()
+        {
+            return System.Web.Mvc.Html.EnumHelper.GetSelectList(typeof(StatusEnum)); ;
         }
     }
 }

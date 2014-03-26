@@ -11,10 +11,10 @@ namespace TrackerWebApi.Models
 
         public string JobName { get; set; }
 
-        public int ConsignmentId { get; set; }
+        public Consignment Consignment { get; set; }
 
-        public int PostManId { get; set; }
+        public PostMan PostMan { get; set; }
 
-        public string Status { get; set; }
+        public int StatusId { get; set; }
     }
 }

@@ -32,7 +32,7 @@ namespace TrackerWebApi.Controllers
         }
 
         // PUT api/address/5
-        public void Put(string id, Address value)
+        public void Put(Address value)
         {
             _repos.UpdateAddress(value);
         }

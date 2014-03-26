@@ -13,37 +13,53 @@ namespace TrackerWebApi.Repository
     {
         private readonly string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
-        public PostMan GetPostManInfo(string PostManId)
+        private IList<PostMan> _getPostManList(string PostManId)
         {
-            if (string.IsNullOrWhiteSpace(PostManId))
-            {
-                throw new ArgumentNullException("PostManId");
-            }
             var QUERY = @"
                 SELECT [PostManId],
                        [ContactNumber],
                        [Name]
-                  FROM [Tracker].[dbo].[PostMan]
-                 WHERE [PostManId] = @PostManId ";
+                  FROM [Tracker].[dbo].[PostMan]";
+
             var postMen = new List<PostMan>();
             using (SqlConnection _dbConnection = new SqlConnection(connectionString))
             {
-                SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
-                cmd.Parameters.Add("@PostManId", SqlDbType.Int).Value = PostManId;
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = _dbConnection;
+                if (!string.IsNullOrWhiteSpace(PostManId))
+                {
+                    QUERY += " WHERE [PostManId] = @PostManId";
+                    cmd.Parameters.Add("@PostManId", SqlDbType.Int).Value = PostManId;
+                }
+                cmd.CommandText = QUERY;
                 _dbConnection.Open();
                 var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
                     var data = new PostMan
                     {
-                        PostManId = Int32.Parse(reader["JobId"].ToString()),
-                        ContactNumber = reader["ConsignmentId"].ToString(),
-                        Name = reader["JobName"].ToString()
+                        PostManId = Int32.Parse(reader["PostManId"].ToString()),
+                        ContactNumber = reader["ContactNumber"].ToString(),
+                        Name = reader["Name"].ToString()
                     };
                     postMen.Add(data);
                 }
             }
-            return postMen.FirstOrDefault();
+            return postMen;
+        }
+
+        public IList<PostMan> GetPostManList()
+        {
+            return _getPostManList(null);
+        }
+
+        public PostMan GetPostManInfo(string PostManId)
+        {
+            if (string.IsNullOrWhiteSpace(PostManId))
+            {
+                throw new ArgumentNullException("PostManId");
+            }
+            return _getPostManList(PostManId).FirstOrDefault();
         }
 
         public void InsertPostManInfo(PostMan PostMan)

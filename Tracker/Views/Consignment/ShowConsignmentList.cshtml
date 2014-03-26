@@ -1,0 +1,239 @@
+﻿@model Tracker.ViewModels.ConsignmentViewModel
+@{
+    ViewBag.Title = @Model.Mode + " Consignment";
+}
+
+<input type="hidden" id="hfUiMode" value="@Model.Mode" />
+<div id="divAddDailog" title="Edit Consignment">
+    <div style="float:left">
+        @using (Html.BeginForm("UpdateConsignment", "Consignment", FormMethod.Post))
+        {
+            @Html.LabelFor(m => m.NewConsignment.TrackingId)
+            @Html.TextBoxFor(m => m.NewConsignment.TrackingId, new { id = "txtTrackingId", @readonly = "readonly" })
+
+            @Html.LabelFor(m => m.NewConsignment.ContactNumber)
+            @Html.TextBoxFor(m => m.NewConsignment.ContactNumber, new { id = "txtContactNumber" })
+
+            @Html.LabelFor(m => m.NewConsignment.Remarks)
+            @Html.TextBoxFor(m => m.NewConsignment.Remarks, new { id = "txtRemarks" })
+
+            @Html.LabelFor(m => m.NewConsignment.Status)
+            @Html.DropDownListFor(m => m.NewConsignment.Status, Model.JobStatusList, new { id = "ddlStatus" })            
+
+            @Html.LabelFor(m => m.NewConsignment.Destination.AddressLine1)
+            @Html.TextBoxFor(m => m.NewConsignment.Destination.AddressLine1, new { id = "txtAddressLine1" })
+
+            @Html.LabelFor(m => m.NewConsignment.Destination.AddressLine2)
+            @Html.TextBoxFor(m => m.NewConsignment.Destination.AddressLine2, new { id = "txtAddressLine2" })
+
+            @Html.LabelFor(m => m.NewConsignment.Destination.City)
+            @Html.TextBoxFor(m => m.NewConsignment.Destination.City, new { id = "txtCity" })
+
+            @Html.LabelFor(m => m.NewConsignment.Destination.State)
+            @Html.TextBoxFor(m => m.NewConsignment.Destination.State, new { id = "txtState" })
+
+            @Html.LabelFor(m => m.NewConsignment.Destination.Country)
+            @Html.TextBoxFor(m => m.NewConsignment.Destination.Country, new { id = "txtCountry" })
+
+            @Html.LabelFor(m => m.NewConsignment.Destination.PinCode)
+            @Html.TextBoxFor(m => m.NewConsignment.Destination.PinCode, new { id = "txtPincode" })
+
+            @Html.HiddenFor(m => m.NewConsignment.Destination.GeoLocation.Latitude, new { id = "hfLatitude" })
+            @Html.HiddenFor(m => m.NewConsignment.Destination.GeoLocation.Longitude, new { id = "hfLongitude" })
+
+            @Html.HiddenFor(m => m.NewConsignment.Destination.AddressId, new { id = "hfAddressId" })
+            @Html.HiddenFor(m => m.NewConsignment.ConsignmentId, new { id = "hfConsignmentId" })
+            <br />
+            <input id="btnSave" type="submit" value="Save" /><a id="resetMapLink" href="#" style="display:none">Reset Geo Location</a>
+        }
+    </div>
+
+    <div style="padding-top:2em; height:600px;width:600px;" id="divEditMapCanvas">
+    </div>
+</div>
+
+
+<table class="grid-style">
+    <caption>
+        <form action="/Home/TrackConsignment" method="get">
+            @if (Model.Mode == "Edit")
+            {
+                <span>Click list item to Edit</span>
+            }
+            else
+            {
+                <span>Delete list item</span>
+            }
+            <span style="float:right; padding-right:10px;">Search <input type="text" name="TrackingId" style="width:8em;font-size:0.9em;" /> <button data-icon="ui-icon-search" style="height:1.6em;"></button></span>
+        </form>
+    </caption>
+    <thead>
+        <tr>
+            <th>Tracking ID</th>
+            <th>Status</th>
+            <th>Remarks</th>
+            <th>Assign Date Time</th>
+            <th>Delivery Date Time</th>
+            <th>Contact Number</th>
+            <th>Address</th>
+            @if (Model.Mode == "Delete")
+            {
+                <th>Delete</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ConsignmentList)
+        {
+            <tr @Html.Raw(Model.Mode == "Edit" ? "style='cursor:pointer'" : "") data-consignment-id="@item.ConsignmentId" data-track-id="@item.TrackingId" data-status="@item.Status" data-remarks="@item.Remarks" data-contactnumber="@item.ContactNumber"
+                data-address-id="@item.Destination.AddressId" data-address-line1="@item.Destination.AddressLine1" data-address-line2="@item.Destination.AddressLine2" data-address-city="@item.Destination.City"
+                data-address-country="@item.Destination.Country" data-address-landmark="@item.Destination.LandMark" data-address-pincode="@item.Destination.PinCode" data-address-state="@item.Destination.State"
+                data-address-geo-lat="@item.Destination.GeoLocation.Latitude" data-address-geo-lng="@item.Destination.GeoLocation.Longitude">
+                <td>@Html.ActionLink(item.TrackingId, "TrackConsignment", "Home", new { TrackingId = item.TrackingId }, null)</td>
+                <td>@Model.GetJobStatus(item.Status)</td>
+                <td>@item.Remarks</td>
+                <td>@item.AssignDateTime</td>
+                <td>@item.DeliveryDateTime</td>
+                <td>@item.ContactNumber</td>
+                <td>
+                    @item.Destination.AddressLine1
+                    @item.Destination.AddressLine2
+                    @item.Destination.City
+                    @item.Destination.State
+                    @item.Destination.Country
+                    @item.Destination.PinCode
+                    @item.Destination.LandMark
+                </td>
+                @if (Model.Mode == "Delete")
+                {
+                    <td>
+                        @using (Html.BeginForm("DeleteConsignment", "Consignment", FormMethod.Post))
+                        {
+                            <input type="hidden" name="ConsignmentId" value="@item.ConsignmentId" />
+                            <button @Html.Raw(item.Status == "Completed" ? "disabled='disabled'" : "") onclick="if (confirm('Are you sure you want to delete?')) { $(this).submit();}else{return false;}" data-icon="ui-icon-trash" style="height:1.7em;"></button>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section scripts{
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script type="text/javascript">
+        $(function () {
+            var currLng = null;
+            var currLat = null;
+            var marker = null;
+
+            $.each($("button[data-icon]"), function (index, item) {
+                $(item).button({
+                    icons: {
+                        primary: $(this).attr('data-icon')
+                    },
+                    text: false
+                });
+            });
+
+            $dlg = $('#divAddDailog').dialog({
+                autoOpen: false,
+                position: { my: "top", at: "right-26% top+3%", of: window },
+                minWidth: 960,
+                resizeStop: function (event, ui) { google.maps.event.trigger(map, 'resize') },
+                open: function (event, ui) { google.maps.event.trigger(map, 'resize'); },
+                closeOnEscape: true
+            });
+
+            if ($('#hfUiMode').val() == "Edit") {
+                $('table tr[data-track-id]').on('click', function () {
+                    $('#hfAddressId').val($(this).attr("data-address-id"));
+                    $('#hfConsignmentId').val($(this).attr("data-consignment-id"));
+                    $('#txtTrackingId').val($(this).attr("data-track-id"));
+                    $('#ddlStatus').val($(this).attr("data-status"));
+                    $('#txtRemarks').val($(this).attr("data-remarks"));
+                    $('#txtContactNumber').val($(this).attr("data-contactnumber"));
+                    $('#txtAddressLine1').val($(this).attr("data-address-line1"));
+                    $('#txtAddressLine2').val($(this).attr("data-address-line2"));
+                    $('#txtCity').val($(this).attr("data-address-city"));
+                    $('#txtState').val($(this).attr("data-address-state"));
+                    $('#txtCountry').val($(this).attr("data-address-country"));
+                    $('#txtPincode').val($(this).attr("data-address-pincode"));
+                    $('#hfLatitude').val($(this).attr("data-address-geo-lat"));
+                    $('#hfLongitude').val($(this).attr("data-address-geo-lng"));
+
+                    currLng = $('#hfLongitude').val();
+                    currLat = $('#hfLatitude').val();
+                    newMarker.setMap(null);
+                    ShowCurrentDeliveryLocation(map);
+                    $dlg.dialog('open');
+                });
+
+                $('#hfLongitude, #hfLatitude').on('change', function (e) {
+                    ShowClickedLocation($('#hfLatitude').val(), $('#hfLongitude').val());
+                });
+
+                var options = {
+                    zoom: 13,
+                    center: new google.maps.LatLng(currLat, currLng),
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+                google.maps.visualRefresh = true;
+                var map = new google.maps.Map(document.getElementById('divEditMapCanvas'), options);
+
+                var newMarker = new google.maps.Marker({
+                    map: map,
+                    title: 'New Delivery Location will be changed here.',
+                    draggable: true,
+                    raiseOnDrag: false,
+                    animation: google.maps.Animation.DROP
+                });
+
+                function ShowCurrentDeliveryLocation(map) {
+                    if (marker) {
+                        marker.setMap(null);
+                    }
+                    // Adding a marker to the map
+                    marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(currLat, currLng),
+                        title: 'Current Delivery Location is here.',
+                        animation: google.maps.Animation.BOUNCE,
+                        icon: 'http://gmaps-samples.googlecode.com/svn/trunk/markers/green/blank.png'
+                    });
+                    marker.setMap(map);
+                    window.setTimeout(function () { map.panTo(marker.getPosition()); }, 3000);
+                }
+
+                function ShowClickedLocation(lat, lng) {
+                    $('#resetMapLink').show();
+                    document.getElementById("hfLatitude").value = lat;
+                    document.getElementById("hfLongitude").value = lng;
+                    newMarker.setPosition(new google.maps.LatLng(lat, lng, false));
+                }
+
+                google.maps.event.addListener(map, 'click', function (e) {
+                    ShowClickedLocation(e.latLng.lat(), e.latLng.lng());
+                    newMarker.setMap(map);
+                    window.setTimeout(function () { map.panTo(newMarker.getPosition()); }, 3000);
+                });
+
+                google.maps.event.addListener(newMarker, 'drag', function (e) {
+                    ShowClickedLocation(e.latLng.lat(), e.latLng.lng());
+                });
+
+                google.maps.event.addListener(newMarker, 'dragend', function (e) {
+                    window.setTimeout(function () { map.panTo(newMarker.getPosition()); }, 3000);
+                });
+
+                $('#resetMapLink').on('click', function () {
+                    $('#resetMapLink').hide();
+                    newMarker.setMap(null);
+                    $('#hfLatitude').val($(this).attr("data-address-geo-lat"));
+                    $('#hfLongitude').val($(this).attr("data-address-geo-lng"));
+                    window.setTimeout(function () { map.panTo(new google.maps.LatLng(currLng, currLng)); }, 1000);
+                });
+            }
+        });
+    </script>
+}

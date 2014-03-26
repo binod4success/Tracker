@@ -9,6 +9,8 @@ namespace TrackerWebApi.Repository
 {
     interface IPostMan
     {
+        IList<PostMan> GetPostManList();
+
         PostMan GetPostManInfo(string postManId);
 
         void InsertPostManInfo(PostMan postMan);

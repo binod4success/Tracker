@@ -13,31 +13,31 @@ namespace TrackerWebApi.Controllers
     {
         private static readonly IConsignment _repos = new ConsignmentRepository();
 
-        // GET api/values
+        // GET api/values/Get
         public IList<Consignment> Get()
         {
             return _repos.GetConsignments();
         }
 
-        // GET api/values/5
+        // GET api/values/Get/5
         public Consignment Get(int? id)
         {
             return _repos.GetConsignment(id);
         }
 
-        // POST api/values
+        // POST api/values/Post
         public void Post(Consignment value)
         {
             _repos.InsertConsignment(value);
         }
 
-        // PUT api/values/5
-        public void Put(int id, Consignment value)
+        // PUT api/values/Put/5
+        public void Put(Consignment value)
         {
             _repos.UpdateConsignment(value);
         }
 
-        // DELETE api/values/5
+        // DELETE api/values/Delete/5
         public void Delete(string id)
         {
             _repos.DeleteConsignment(id);

@@ -1,0 +1,135 @@
+﻿@model Tracker.ViewModels.JobViewModel
+@{
+    ViewBag.Title = "Index";
+}
+
+<table class="grid-style">
+    <caption>
+        <form action="/Home/TrackConsignment" method="get">
+            <span>Showing List</span>
+            <span style="float:right; padding-right:10px;">Search <input type="text" name="TrackingId" style="width:8em;font-size:0.9em;" /> <button data-icon="ui-icon-search" style="height:1.6em;"></button></span>
+        </form>
+    </caption>
+    <thead>
+        <tr>
+            <th>Job</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Consignment</th>
+            <th>Ship To Address</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.TaskList)
+        {
+            <tr>
+                <td title="click to track current location.">@Html.ActionLink(item.JobName, "TrackMe", "Home", new { JobId = item.JobId }, null)</td>
+                <td>@Model.Status(item.StatusId.ToString())</td>
+                <td title="Contact Number: @item.PostMan.ContactNumber">@item.PostMan.Name</td>
+                <td title="Assigned at: @item.Consignment.AssignDateTime">
+                    @Html.ActionLink(item.Consignment.TrackingId, "TrackConsignment", "Home", new { TrackingId = item.Consignment.TrackingId }, null)
+                </td>
+                <td>
+                    @item.Consignment.Destination.AddressLine1
+                    @item.Consignment.Destination.AddressLine2<br />
+                    @item.Consignment.Destination.City
+                    @item.Consignment.Destination.State
+                    @item.Consignment.Destination.Country
+                    @item.Consignment.Destination.PinCode
+                    @item.Consignment.Destination.LandMark<br />
+                    Contact No: @item.Consignment.ContactNumber
+                </td>
+                <td>
+                    <button data-icon="ui-icon-pencil" @Html.Raw(item.StatusId == 2 ? "disabled='disabled'" : "") data-job-name="@item.JobName"
+                            data-job-status-id="@item.StatusId" data-postman-id="@item.PostMan.PostManId" data-job-id="@item.JobId">Edit</button>
+                    <button data-icon="ui-icon-trash" @Html.Raw(item.StatusId == 2 ? "disabled='disabled'" : "") data-url='@string.Format("/Job/DeleteJob?JobId={0}", item.JobId)'>Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div id="dlgEditJob" title="Edit Job">
+    <div style="float:left">
+        @using (Html.BeginForm("EditJob", "Job", FormMethod.Post))
+        {
+            @Html.HiddenFor(m => m.JobId, new { Id = "hfJobId" })
+            <div>
+                <label style="display:inline-block; padding-right:3em;">Job</label>
+                <span id="spnJob"></span>
+            </div>
+            <div>
+                <label style="display: inline-block" for="ddlPostmanList">Post Man</label>
+                @Html.DropDownListFor(m => m.PostManId, Model.PostMen, new { id = "ddlPostmanList" })
+            </div>
+            <div>
+                <label style="display: inline-block" for="@Html.NameFor(m => m.JobStatusId)">Job Status</label>
+                @Html.DropDownListFor(m => m.JobStatusId, Model.JobStatusList, new { id = "ddlJobStatusId" })
+            </div>
+            <br />
+            <input id="btnSave" data-icon="ui-icon-disk" type="submit" value="Save" />
+        }
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $.each($("button[data-icon]"), function (index, item) {
+                $(item).button({
+                    icons: {
+                        primary: $(this).attr('data-icon')
+                    },
+                    text: false
+                }).on('click', function () {
+                    if ($(this).attr('data-icon') == "ui-icon-pencil") {
+                        $('#hfJobId').val($(this).attr('data-job-id'));                        
+                        $('#spnJob').html($(this).attr('data-job-Name'));
+                        $('#ddlPostmanList').val($(this).attr('data-postman-id'));
+                        $('#ddlJobStatusId').val($(this).attr('data-job-status-id'));
+                        $('#dlgEditJob').dialog('open');
+                    } else if ($(this).attr('data-icon') == "ui-icon-trash") {
+                        if (confirm('Are you sure, you want to delete this job?')) {
+                            $.ajax({
+                                url: $(this).attr('data-url'),
+                                type: 'POST',
+                                context: this,
+                                statusCode: {
+                                    // Success
+                                    200: function (data, textStatus, jqXHR) {
+                                        $(this).closest('tr').hide(3000);
+                                    },
+                                    203: function (data, textStatus, jqXHR) {
+                                        alert('Error');
+                                    }
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    alert(jqXHR.responseText);
+                                }
+
+                            });
+                        } else {
+                            return false;
+                        }
+                    }
+                });
+            });
+
+            $('#dlgEditJob').dialog({
+                autoOpen: false,
+                position: { my: "top", at: "right-15% top+22%", of: window },
+                closeOnEscape: true
+            });
+
+            $('input[data-icon=ui-icon-disk]').button({
+                icons: {
+                    primary: 'ui-icon-disk'
+                },
+                text: false
+            }).on('click', function () {
+
+            });
+        });
+    </script>
+}

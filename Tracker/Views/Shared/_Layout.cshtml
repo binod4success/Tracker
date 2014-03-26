@@ -6,6 +6,7 @@
     <title>@ViewBag.Title - Tracker</title>
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <meta name="viewport" content="width=device-width" />
+    @*<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />*@
     @Styles.Render("~/Content/css")
     @Styles.Render("~/Content/themes/base/css")
     @Scripts.Render("~/bundles/modernizr")
@@ -27,9 +28,8 @@
                         <a href="/Home/Index" class="parent"><span>Home</span></a>
                         <div>
                             <ul>
-                                <li><a href="#"><span>Sub Item 1</span></a></li>
-                                <li><a href="#"><span>Sub Item 2</span></a></li>
-                                <li><a href="#"><span>Sub Item 3</span></a></li>
+                                <li><a href="/Home/Tracker"><span>Job List</span></a></li>
+                                <li><a href="/Home/TrackMe"><span>Track Me</span></a></li>
                             </ul>
                         </div>
                     </li>
@@ -38,10 +38,11 @@
                         <div class="columns two">
                             <ul class="one">
                                 <li><a href="/Consignment/Index"><span>New Consignment</span></a></li>
-                                <li><a href="/Consignment/EditConsignment"><span>Edit Consignment</span></a></li>
-                                <li><a href="#"><span>Delete Consignment</span></a></li>
+                                <li><a href="/Consignment/ShowConsignmentList?Mode=Edit"><span>Edit Consignment</span></a></li>
+                                <li><a href="/Consignment/ShowConsignmentList?Mode=Delete"><span>Delete Consignment</span></a></li>
                                 <li><a href="/Home/TrackConsignment"><span>Track Consignment</span></a></li>
                                 <li><a href="#"><span>Reschedule Consignment</span></a></li>
+                                <li><a href="/Job/Index"><span>Manage Job</span></a></li>
                             </ul>
                             <ul class="two">
                                 <li><a href="#"><span>New Postman</span></a></li>

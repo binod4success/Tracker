@@ -28,11 +28,21 @@ namespace Tracker.Controllers
         }
 
 
-        public ActionResult EditConsignment()
+        public ActionResult ShowConsignmentList(string mode)
         {
-            var model = new ConsignmentViewModel();
-            model.ConsignmentList = _tarckingRepos.GetAllConsignmentDetails();
+            var model = new ConsignmentViewModel
+            {
+                Mode = mode,
+                ConsignmentList = _tarckingRepos.GetAllConsignmentDetails()
+            };
             return View(model);
+        }
+
+        [HttpPost]
+        public ActionResult UpdateConsignment(Consignment newConsignment)
+        {
+            _consignmentRepos.UpdateConsignment(newConsignment);
+            return RedirectToAction("ShowConsignmentList", new { Mode = "Edit" });
         }
 
         [HttpPost]
@@ -40,6 +50,13 @@ namespace Tracker.Controllers
         {
             _consignmentRepos.InsertConsignment(newConsignment);
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteConsignment(string consignmentId)
+        {
+            _consignmentRepos.DeleteConsignment(consignmentId);
+            return RedirectToAction("ShowConsignmentList", new { Mode = "Delete"});
         }
     }
 }

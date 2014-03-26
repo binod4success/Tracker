@@ -38,7 +38,7 @@
         {
             <tr>
                 <td>@Html.ActionLink(item.TrackingId, "TrackConsignment", "Home", new { TrackingId = item.TrackingId }, null)</td>
-                <td>@item.Status</td>
+                <td>@Model.GetJobStatus(item.Status)</td>
                 <td>@item.Remarks</td>
                 <td>@item.AssignDateTime</td>
                 <td>@item.DeliveryDateTime</td>

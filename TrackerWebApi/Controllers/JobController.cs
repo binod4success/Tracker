@@ -13,31 +13,32 @@ namespace TrackerWebApi.Controllers
     {
         private static readonly IJob _repos = new JobRepository();
 
-        // GET api/job
-        public IEnumerable<string> Get()
+        // GET api/job/Get
+        public IEnumerable<Job> Get()
         {
-            return new string[] { "value1", "value2" };
+            var data = _repos.GetJobs();
+            return data;
         }
 
-        // GET api/job/5
+        // GET api/job/Get?id=5
         public Job Get(string jobId)
         {
             return _repos.GetJob(jobId);
         }
 
-        // POST api/job
+        // POST api/job/Post
         public void Post(Job value)
         {
             _repos.InsertJob(value);
         }
 
-        // PUT api/job/5
-        public void Put(int jobId, Job value)
+        // PUT api/job/Put
+        public void Put(Job value)
         {
             _repos.UpdateJob(value);
         }
 
-        // DELETE api/job/5
+        // DELETE api/job/Delete?id=5
         public void Delete(string jobId)
         {
             _repos.DeleteJob(jobId);

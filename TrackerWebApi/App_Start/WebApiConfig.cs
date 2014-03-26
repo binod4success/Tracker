@@ -11,8 +11,18 @@ namespace TrackerWebApi
         {
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
+                routeTemplate: "api/{controller}/{action}/{id}",
                 defaults: new { id = RouteParameter.Optional }
+            );
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi2",
+                routeTemplate: "api/{controller}/{action}"
+            );
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi3",
+                routeTemplate: "api/{controller}/{id}"
             );
 
             // Uncomment the following line of code to enable query support for actions with an IQueryable or IQueryable<T> return type.

@@ -14,10 +14,10 @@ namespace TrackerWebApi.Controllers
         private static readonly ITrack _repos = new TrackingRepository();
 
         // GET api/tracking
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        //public IEnumerable<string> Get()
+        //{
+        //    return new string[] { "value1", "value2" };
+        //}
 
         // GET api/tracking/5
         public IList<TrackingDetails> Get(string trackingId)
@@ -28,6 +28,7 @@ namespace TrackerWebApi.Controllers
         // POST api/tracking
         public void Post(TrackingDetails value)
         {
+            _repos.InsertNewLocation(value.JobId.ToString(), value.Locations);
         }
 
         // PUT api/tracking/5
@@ -38,6 +39,11 @@ namespace TrackerWebApi.Controllers
         // DELETE api/tracking/5
         public void Delete(string trackingId)
         {
+        }
+
+        public GeoLocation GetCurrentLocation(string trackingId)
+        {
+            return new GeoLocation();
         }
     }
 }

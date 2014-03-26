@@ -12,26 +12,30 @@ namespace TrackerWebApi.Repository
     public class JobRepository : IJob
     {
         private readonly string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+        private static readonly IConsignment _consignmentRepos = new ConsignmentRepository();
+        private static readonly IPostMan _postManRepos = new PostManRepository();
 
-        public Job GetJob(string jobId)
+        private IList<Job> GetJobsList(string jobId)
         {
-            if (string.IsNullOrWhiteSpace(jobId))
-            {
-                throw new ArgumentNullException("jobId");
-            }
             var QUERY = @"
                 SELECT [JobId],
                        [ConsignmentId],
                        [JobName],
                        [PostManId],
                        [Status]
-                  FROM [Tracker].[dbo].[Job]
-                 WHERE [JobId] = @JobId ";
+                  FROM [Tracker].[dbo].[Job]";
+
             var jobs = new List<Job>();
             using (SqlConnection _dbConnection = new SqlConnection(connectionString))
             {
-                SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
-                cmd.Parameters.Add("@JobId", SqlDbType.Int).Value = jobId;
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = _dbConnection;
+                if (!string.IsNullOrWhiteSpace(jobId))
+                {
+                    QUERY += " WHERE [JobId] = @JobId ";
+                    cmd.Parameters.Add("@JobId", SqlDbType.Int).Value = jobId;
+                }
+                cmd.CommandText = QUERY;
                 _dbConnection.Open();
                 var reader = cmd.ExecuteReader();
                 while (reader.Read())
@@ -39,14 +43,29 @@ namespace TrackerWebApi.Repository
                     var data = new Job
                     {
                         JobId = Int32.Parse(reader["JobId"].ToString()),
-                        ConsignmentId = Int32.Parse(reader["ConsignmentId"].ToString()),
+                        Consignment = _consignmentRepos.GetConsignment(Int32.Parse(reader["ConsignmentId"].ToString())),
+                        PostMan = _postManRepos.GetPostManInfo(reader["PostManId"].ToString()),
                         JobName = reader["JobName"].ToString(),
-                        PostManId = Int32.Parse(reader["PostManId"].ToString()),
-                        Status = reader["Status"].ToString()
+                        StatusId = Int32.Parse(reader["Status"].ToString())
                     };
                     jobs.Add(data);
                 }
             }
+            return jobs;
+        }
+
+        public IList<Job> GetJobs()
+        {
+            return GetJobsList(null);
+        }
+
+        public Job GetJob(string jobId)
+        {
+            if (string.IsNullOrWhiteSpace(jobId))
+            {
+                throw new ArgumentNullException("jobId");
+            }
+            var jobs = GetJobsList(jobId);
             return jobs.FirstOrDefault();
         }
 
@@ -71,11 +90,11 @@ namespace TrackerWebApi.Repository
                                        @Status)";
 
                 SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
-                                
-                SqlHelper.AddParameter(ref cmd, "@ConsignmentId", SqlDbType.Int, job.ConsignmentId);
+
+                SqlHelper.AddParameter(ref cmd, "@ConsignmentId", SqlDbType.Int, job.Consignment.ConsignmentId);
                 SqlHelper.AddParameter(ref cmd, "@JobName", SqlDbType.VarChar, job.JobName);
-                SqlHelper.AddParameter(ref cmd, "@PostManId", SqlDbType.Int, job.PostManId);
-                SqlHelper.AddParameter(ref cmd, "@Status", SqlDbType.VarChar, job.Status);
+                SqlHelper.AddParameter(ref cmd, "@PostManId", SqlDbType.Int, job.PostMan.PostManId);
+                SqlHelper.AddParameter(ref cmd, "@Status", SqlDbType.VarChar, job.StatusId);
 
                 _dbConnection.Open();
                 cmd.ExecuteNonQuery();
@@ -92,19 +111,15 @@ namespace TrackerWebApi.Repository
             {
                 string QUERY = @"
                             UPDATE [Tracker].[dbo].[Job]
-                               SET [ConsignmentId] = @ConsignmentId,
-                                   [JobName] = @JobName,                                   
-                                   [PostManId] = @PostManId,
+                               SET [PostManId] = @PostManId,
                                    [Status] = @Status
                              WHERE [JobId] = @JobId";
 
                 SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);
 
-                SqlHelper.AddParameter(ref cmd, "@JobId", SqlDbType.Int, job.JobId);
-                SqlHelper.AddParameter(ref cmd, "@ConsignmentId", SqlDbType.Int, job.ConsignmentId);
-                SqlHelper.AddParameter(ref cmd, "@JobName", SqlDbType.VarChar, job.JobName);
-                SqlHelper.AddParameter(ref cmd, "@PostManId", SqlDbType.Int, job.PostManId);
-                SqlHelper.AddParameter(ref cmd, "@Status", SqlDbType.VarChar, job.Status);
+                SqlHelper.AddParameter(ref cmd, "@JobId", SqlDbType.Int, job.JobId);                
+                SqlHelper.AddParameter(ref cmd, "@PostManId", SqlDbType.Int, job.PostMan.PostManId);
+                SqlHelper.AddParameter(ref cmd, "@Status", SqlDbType.VarChar, job.StatusId);
 
                 _dbConnection.Open();
                 cmd.ExecuteNonQuery();
@@ -113,7 +128,7 @@ namespace TrackerWebApi.Repository
 
         public void DeleteJob(string jobId)
         {
-            const string QUERY = @" [Tracker].[dbo].[Job] WHERE JobId = @jobId";
+            const string QUERY = @"DELETE FROM [Tracker].[dbo].[Job] WHERE [JobId] = @jobId";
             using (SqlConnection _dbConnection = new SqlConnection(connectionString))
             {
                 SqlCommand cmd = new SqlCommand(QUERY, _dbConnection);

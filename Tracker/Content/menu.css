@@ -6,6 +6,7 @@
     -moz-border-radius: 50px !important;
     -webkit-border-radius: 50px !important;
     border-radius: 50px !important;
+    z-index: 1;
 }
 
     #menu .menu {

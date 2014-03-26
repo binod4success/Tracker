@@ -1,0 +1,58 @@
+﻿@model Tracker.ViewModels.TrackerViewModel
+@{
+    ViewBag.Title = "Tracker";
+}
+
+<table class="grid-style">
+    <caption>
+        <form action="/Home/TrackConsignment" method="get">
+            <span>Showing List</span>
+            <span style="float:right; padding-right:10px;">Search <input type="text" name="TrackingId" style="width:8em;font-size:0.9em;" /> <button id="btnSearch" style="height:1.6em;"></button></span>
+        </form>
+    </caption>
+    <thead>
+        <tr>
+            <th>Job</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Consignment</th>
+            <th>Ship To Address</th>            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.TaskList)
+        {
+            <tr>
+                <td title="click to track current location.">@Html.ActionLink(item.JobName, "TrackMe", "Home", new { JobId = item.JobId }, null)</td>
+                <td>@Model.GetJobStatus(item.StatusId.ToString())</td>
+                <td title="Contact Number: @item.PostMan.ContactNumber">@item.PostMan.Name</td>
+                <td title="Assigned at: @item.Consignment.AssignDateTime">
+                    @Html.ActionLink(item.Consignment.TrackingId, "TrackConsignment", "Home", new { TrackingId = item.Consignment.TrackingId }, null)
+                </td>
+                <td>
+                    @item.Consignment.Destination.AddressLine1
+                    @item.Consignment.Destination.AddressLine2<br />
+                    @item.Consignment.Destination.City
+                    @item.Consignment.Destination.State
+                    @item.Consignment.Destination.Country
+                    @item.Consignment.Destination.PinCode
+                    @item.Consignment.Destination.LandMark<br />
+                    Contact No: @item.Consignment.ContactNumber
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $("#btnSearch").button({
+                icons: {
+                    primary: "ui-icon-search"
+                },
+                text: false
+            });
+        });
+    </script>
+}

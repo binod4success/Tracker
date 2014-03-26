@@ -1,0 +1,191 @@
+﻿@model Tracker.ViewModels.TrackConsignmentViewModel
+@{
+    ViewBag.Title = "TrackConsignment";
+    var trackingDetails = Json.Encode(Model.TrackingLocations);
+}
+
+<input type="hidden" id="hfTrackingDetails" value='@Html.Raw(trackingDetails)' />
+<input type="hidden" id="hfTrackingId" value="@Model.TrackingId" />
+
+@*<h3>Consignment Tracking Number: @Html.TextBoxFor(m => m.TrackingId) </h3>*@
+
+
+<form action="/Home/TrackConsignment" method="get">
+    <label for="TrackingId" style="display:inline-block">Consignment Tracking Number</label>
+    <input type="text" name="TrackingId" value="@Model.TrackingId" /> <button id="btnSearch" style="height:2.2em;"></button>
+</form>
+
+
+<table class="grid-style">
+    <caption>Locations List</caption>
+    <thead>
+        <tr>
+            <th>Location</th>
+            <th>Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td width="80%" rowspan="@(Model.TrackingLocations.Count + 1)">
+                <div id="map_canvas" style="width: 100%; height: 600px"></div>
+            </td>
+        </tr>
+        @foreach (var item in Model.TrackingLocations)
+        {
+            <tr>
+                <td width="20%">
+                    @item.TrackingDateTime
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts{
+    <style type="text/css">
+        .map {
+            width: 305px;
+            height: 305px;
+            border: 5px solid gray;
+            border-radius: 10px;
+        }
+    </style>
+    @Styles.Render("~/Content/css/NavigatorPulsate")
+    <script src="~/Scripts/jquery.signalR-2.0.2.min.js" type="text/javascript"></script>
+    <script src="~/signalr/hubs"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script type="text/javascript">
+        var map;
+        var bounds;
+        var markers = [];
+        var TrackingCoordinates = [];
+        var TrackingPath;
+        $(function () {
+            $("#btnSearch").button({
+                icons: {
+                    primary: "ui-icon-search"
+                },
+                text: false
+            });            
+            google.maps.event.addDomListener(window, 'load', initialize);
+        });
+
+        function initialize() {
+            var data = $.parseJSON($('#hfTrackingDetails').val());
+            $.each(data, function (key, item) {
+                TrackingCoordinates.push(new google.maps.LatLng(item["Locations"]["Latitude"], item["Locations"]["Longitude"]));
+            });
+            if (TrackingCoordinates.length == 0)
+            {
+                $('#map_canvas').append("<strong style='padding-top:5em;'>Map can't be shown now.</strong>");
+                return false;
+            }
+            var mapOptions = {
+                zoom: 13,
+                //center: new google.maps.LatLng(32.71533, -117.15726),
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            // Creating a LatLngBounds object
+            bounds = new google.maps.LatLngBounds();
+            map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);            
+            ShowMapData();
+        }
+        function ShowMapData() {
+            DrawNavigationPath();
+            placeAllMarkers();
+        }
+
+        function updateMapData(newLocation) {
+            for (var i = 0; i < TrackingCoordinates.length - 1 ; i++) {
+                if (TrackingCoordinates[i].lat() == newLocation["Latitude"] && TrackingCoordinates[i].lng() == newLocation["Longitude"]) {
+                    continue;
+                } else {
+                    TrackingCoordinates.push(new google.maps.LatLng(newLocation["Latitude"], newLocation["Longitude"]));
+                }
+            }
+            clearMap();
+            ShowMapData();
+        }
+
+        function DrawNavigationPath() {
+            TrackingPath = new google.maps.Polyline({
+                path: TrackingCoordinates,
+                geodesic: true,
+                strokeColor: '#3a79c8',
+                strokeOpacity: 1.0,
+                strokeWeight: 2
+            });
+            TrackingPath.setMap(map);
+        }
+        function placeAllMarkers() {
+            var max = TrackingCoordinates.length;
+            // Adding the markers expect last one
+            //0 based index
+            for (var i = 0; i < (max - 1) - 1 ; i++) {
+                // build entire marker first time thru
+                var marker = new google.maps.Marker({
+                    position: TrackingCoordinates[i],
+                    map: map,
+                    //title: TrackSequences[i]
+                });
+                bounds.extend(TrackingCoordinates[i]);
+                markers.push(marker);
+            }
+            //Remove last location from array to show it as current location with navigator
+            var LastLocation = TrackingCoordinates[max - 1];
+            MarkLastLocation(LastLocation);
+            // Extending the bounds object with each LatLng
+            bounds.extend(LastLocation);
+            // Adjusting the map to new bounding box
+            map.fitBounds(bounds);
+        }
+        function MarkLastLocation(LastLocation) {
+            // define our custom marker image
+            var image = new google.maps.MarkerImage(
+                '/Images/bluedot_retina.png',
+                null, // size
+                null, // origin
+                new google.maps.Point(8, 8), // anchor (move to center of marker)
+                new google.maps.Size(17, 17) // scaled size (required for Retina display icon)
+            );
+            // then create the new marker
+            var myMarker = new google.maps.Marker({
+                flat: true,
+                icon: image,
+                map: map,
+                optimized: false,
+                position: LastLocation,
+                title: 'I might be here',
+                visible: true
+            });
+            markers.push(myMarker);
+        }
+        function clearMap() {
+            TrackingPath.setMap(null);
+            $.each(markers, function (index) {
+                markers[index].setMap(null);
+            });
+        }
+    </script>
+
+    <script type="text/javascript">
+        // var TrackingPath = null;
+        $(function () {
+            var trackingId = $('#hfTrackingId').val();
+
+            // Proxy created on the fly
+            var trackingHub = $.connection.trackingHub;
+
+            // Start the connection
+            $.connection.hub.start().done(function () {
+                //Join the postmanGroup
+                trackingHub.server.joinGroup(trackingId);
+            });
+            // Declare a function on the job hub so the server can invoke it
+            trackingHub.client.displayStatus = function (data) {
+                //Method of clients to show its updated data
+                updateMapData(data);
+            };
+        });
+    </script>
+}

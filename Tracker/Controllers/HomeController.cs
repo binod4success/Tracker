@@ -42,6 +42,11 @@ namespace Tracker.Controllers
             return View(model);
         }
 
+        public ActionResult StartTracker()
+        {
+            return View();
+        }
+
         public ActionResult TrackMe(string jobId)
         {
             if (string.IsNullOrWhiteSpace(jobId))

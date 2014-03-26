@@ -26,7 +26,7 @@ namespace Tracker
             //    appId: "",
             //    appSecret: "");
 
-            //OAuthWebSecurity.RegisterGoogleClient();
+            OAuthWebSecurity.RegisterGoogleClient();
         }
     }
 }

@@ -54,7 +54,7 @@ namespace Tracker.Controllers
         {
             WebSecurity.Logout();
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login", "Account");
         }
 
         //
@@ -81,7 +81,7 @@ namespace Tracker.Controllers
                 {
                     WebSecurity.CreateUserAndAccount(model.UserName, model.Password);
                     WebSecurity.Login(model.UserName, model.Password);
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Login", "Account");
                 }
                 catch (MembershipCreateUserException e)
                 {
